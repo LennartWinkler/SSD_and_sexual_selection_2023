@@ -1,0 +1,142 @@
+---
+title: 'Sexual selection and sexual size dimorphism: a meta-analysis of comparative studies'
+author: "Lennart Winkler^1^, Robert P Freckleton^2^, Tamas Szekely^3^^4^ & Tim Janicke^1,5^ <br></br>  ^1^Applied Zoology, Technical University Dresden </br>^2^Department of Zoology, University of Oxford, South Parks Road, Oxford OX1 3PS, UK<br>^3^Milner Centre for Evolution, University of Bath, Bath, UK8</br>^4^Department of Evolutionary Zoology and Human Behaviour, University of Debrecen, Debrecen, Hungary</br> ^5^Centre d’Écologie Fonctionnelle et Évolutive, UMR 5175, CNRS, Université de Montpellier</br>"
+subtitle: 'Main analyses'
+site: workflowr::wflow_site
+output:
+  workflowr::wflow_html
+---
+
+Supplementary material reporting R code for the manuscript 'Sexual selection and sexual size dimorphism: a meta-analysis of comparative studies'.
+</br></br>
+Additional analyses excluding studies that did not control for phylogenetic non-independence (Supplement 2) can be found at:
+</br>
+
+</br>
+# Load and prepare data
+Before we started the analyses, we loaded all necessary packages and data.
+```{r Load, message=FALSE, warning=FALSE, results='hide'}
+rm(list = ls()) # Clear work environment
+
+# Load R-packages ####
+list_of_packages=cbind('ape','matrixcalc','metafor','Matrix','MASS','pwr','psych','multcomp','data.table','ggplot2','RColorBrewer','MCMCglmm','ggdist','cowplot','PupillometryR','dplyr','wesanderson')
+lapply(list_of_packages, require, character.only = TRUE)
+
+# Load data set ####
+MetaData <- read.csv("./data/Supplement4_SexSelSSD_V01.csv", sep=";", header=TRUE) # Load data set
+
+N_Studies <- length(summary(as.factor(MetaData$Study_ID))) # Number of included primary studies
+
+Tree<- read.tree("./data/Supplement6_SexSelSSD_V01.txt") # Load phylogenetic tree
+
+# Prune phylogenetic tree
+MetaData_Class_Data <- unique(MetaData$Class)
+Tree_Class<-drop.tip(Tree, Tree$tip.label[-na.omit(match(MetaData_Class_Data, Tree$tip.label))])
+forcedC_Moderators <- as.matrix(forceSymmetric(vcv(Tree_Class, corr=TRUE)))
+
+# Order moderator levels
+MetaData$SexSel_Mode=as.factor(MetaData$SexSel_Mode)
+MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("post-copulatory"))
+MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("pre-copulatory"))
+MetaData$SexSel_Sex=as.factor(MetaData$SexSel_Sex)
+MetaData$SexSel_Sex=relevel(MetaData$SexSel_Sex,c("Male"))
+
+# Set figure theme and colors
+theme=theme(panel.border = element_blank(), 
+            panel.background = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(), 
+            legend.position = c(0.2,0.5),
+            legend.title = element_blank(),
+            legend.text = element_text(colour="black", size=12),
+            axis.line.x = element_line(colour = "black", size = 1),
+            axis.line.y = element_line(colour = "black", size = 1),
+            axis.text.x = element_text(face="plain", color="black", size=16, angle=0),
+            axis.text.y = element_text(face="plain", color="black", size=16, angle=0),
+            axis.title.x = element_text(size=16,face="plain", margin = margin(r=0,10,0,0)),
+            axis.title.y = element_text(size=16,face="plain", margin = margin(r=10,0,0,0)),
+            axis.ticks = element_line(size = 1),
+            axis.ticks.length = unit(.3, "cm"))
+
+colpal=c("#4DAF4A","#377EB8","#E41A1C")
+colpal2=brewer.pal(7, 'Dark2')
+colpal4=c("grey50","grey65")
+colpal4=wes_palette('FantasticFox1', 9, type = c("continuous"))
+Meta_col=c('grey85','grey50','grey20','black')
+
+# Global models ####
+
+# Phylogenetic Model
+Model_REML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_Null)
+
+# Non-phylogenetic Model
+Model_cREML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_Null)
+```
+
+# Global models
+We began the analysis by running global models without additional moderators.</br>
+First, we ran a global model including the phylogeny:
+```{r Global phylogenetic Model, warning=FALSE, message=FALSE}
+Model_REML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_Null)
+```
+
+Second, we ran a global model without the phylogeny:
+```{r Global non-phylogenetic Model, warning=FALSE, message=FALSE}
+Model_cREML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_Null)
+```
+
+# Moderator tests for phylogenetic models ####
+Next, we ran a series of models that test the effect of different moderators.</br>
+Again we started with models including the phylogeny.
+
+## Sexual selection mode #### 
+The first model explores the effect of the sexual selection mode (i.e. pre-copulatory, post-copulatory or both):
+```{r Sexual selection mode, warning=FALSE, message=FALSE}
+MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("pre-copulatory"))
+Model_REML_by_SexSelMode = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_by_SexSelMode)
+```
+We then re-leveled the model for post-hoc comparisons:
+```{r Sexual selection mode (re-leveled), warning=FALSE, message=FALSE, results='hide'}
+MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("post-copulatory"))
+Model_REML_by_SexSelMode2 = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_by_SexSelMode2)
+
+MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("both"))
+Model_REML_by_SexSelMode3 = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_by_SexSelMode3)
+```
+Finally, we computed FDR corrected p-values:
+```{r FDR corrected p-values for Sexual selection mode, warning=FALSE, message=FALSE}
+tab2=as.data.frame(round(p.adjust(c(0.0029, 0.1203, .0001), method = 'fdr'),digit=3),row.names=cbind("Pre-copulatory","Post-copulatory","Both"))
+colnames(tab2)<-cbind('P-value')
+tab2
+```
+## Plot sexual selection mode (Figure 2)
+
+Here we plot the sexual selection mode moderator:
+```{r Figure 2, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure 2: Raincloud plot of correlation coefficients between SSD and the modes of sexual selection proxies (i.e. pre-copulatory, post-copulatory or both) including sample sizes and estimates with 95%CI from phylogenetic model.'}
+MetaData$SexSel_Mode=factor(MetaData$SexSel_Mode, levels = c("both","post-copulatory" ,"pre-copulatory"))
+
+ggplot(MetaData, aes(x=SexSel_Mode, y=r, fill = SexSel_Mode, colour = SexSel_Mode)) +
+  geom_hline(yintercept=0, linetype="longdash", color = "black", linewidth=1)+
+  geom_flat_violin(position = position_nudge(x = 0.25, y = 0),adjust =1, trim = F,alpha=0.6)+
+  geom_point(position = position_jitter(width = .1), size = 2.5,alpha=0.6,stroke=0,shape=19)+
+  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode$b[1,1], x=3.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
+  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode2$b[1,1], x=2.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
+  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode3$b[1,1], x=1.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
+  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode$ci.lb[1], x=3.25, xend= 3.25, yend= Model_REML_by_SexSelMode$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
+  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode2$ci.lb[1], x=2.25, xend= 2.25, yend= Model_REML_by_SexSelMode2$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
+  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode3$ci.lb[1], x=1.25, xend= 1.25, yend= Model_REML_by_SexSelMode3$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
+  ylab(expression(paste("Effect size (", italic("r"),')')))+xlab('Sexual selection mode')+coord_flip()+guides(fill = FALSE, colour = FALSE) +
+  scale_color_manual(values =colpal)+
+  scale_fill_manual(values =colpal)+
+  scale_x_discrete(labels=c("Both","Post-copulatory" ,"Pre-copulatory"),expand=c(.1,0))+
+  annotate("text", x=1, y=1.2, label= "n = 37",size=4.5) +
+  annotate("text", x=2, y=1.2, label= "n = 9",size=4.5) +
+  annotate("text", x=3, y=1.2, label= "n = 39",size=4.5) + theme
+```
