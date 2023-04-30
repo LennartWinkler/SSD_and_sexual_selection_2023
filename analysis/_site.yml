@@ -1,17 +1,21 @@
+---
 name: "SSD_and_sexual_selection_2023"
 output_dir: ../docs
 navbar:
-  title: "SSD_and_sexual_selection_2023"
+  title: "Sexual selection and sexual size dimorphism: a meta-analysis of comparative studies"
   left:
-  - text: Home
+  - text: Analyses
     href: index.html
-  - text: About
-    href: about.html
-  - text: License
-    href: license.html
+  - text: Analyses 2
+    href: index2.html
 output:
   workflowr::wflow_html:
-    toc: yes
-    toc_float: yes
-    theme: cosmo
-    highlight: textmate
+    toc: true
+    toc_float: true
+    depth: 4
+    number_sections: false
+    theme: yeti
+    highlight: tango
+    code_folding: hide
+---
+
