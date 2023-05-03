@@ -630,15 +630,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023tree9c4346c47ebbc3861d8f52043ace5a18acf54224targetblank9c4346ca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023tree378a58c43aa9984c04a269b04aaa7af05ffca5cdtargetblank378a58ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/9c4346c47ebbc3861d8f52043ace5a18acf54224" target="_blank">9c4346c</a>
+<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/378a58c43aa9984c04a269b04aaa7af05ffca5cd" target="_blank">378a58c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023tree9c4346c47ebbc3861d8f52043ace5a18acf54224targetblank9c4346ca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023tree378a58c43aa9984c04a269b04aaa7af05ffca5cdtargetblank378a58ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -648,7 +648,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/9c4346c47ebbc3861d8f52043ace5a18acf54224" target="_blank">9c4346c</a>.
+<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/378a58c43aa9984c04a269b04aaa7af05ffca5cd" target="_blank">378a58c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -708,6 +708,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/blob/378a58c43aa9984c04a269b04aaa7af05ffca5cd/analysis/index.Rmd" target="_blank">378a58c</a>
+</td>
+<td>
+LennartWinkler
+</td>
+<td>
+2023-05-03
+</td>
+<td>
+wflow_publish(republish = TRUE, all = T)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LennartWinkler/SSD_and_sexual_selection_2023/085f45f142505e8b58dda1f4d8843326fa0620d5/docs/index.html" target="_blank">085f45f</a>
+</td>
+<td>
+LennartWinkler
+</td>
+<td>
+2023-05-03
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -900,11 +934,8 @@ all necessary packages and data.</p>
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Non-phylogenetic Model</span></span>
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>Model_cREML_Null         <span class="ot">=</span> <span class="fu">rma.mv</span>(r <span class="sc">~</span> <span class="dv">1</span>, <span class="at">V=</span>Var_r, <span class="at">data =</span> MetaData, <span class="at">random =</span> <span class="fu">c</span>(<span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> Study_ID,<span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> Index), <span class="at">method =</span> <span class="st">&quot;REML&quot;</span>)</span>
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(Model_cREML_Null)</span></code></pre></div>
-<div
-id="global-model-testing-if-increasing-sexual-selection-correlates-with-an-incease-in-ssd"
-class="section level1">
-<h1>Global model testing if increasing sexual selection correlates with
-an incease in SSD</h1>
+<div id="global-model-version-1" class="section level1">
+<h1>Global model Version 1</h1>
 <p>First, we tested if increasing sexual selection (estimated via
 diverse proxies; see Table S1) correlated with the degree of SSD. To
 this end we ran a global model on the absolute correlation coefficients
@@ -968,11 +999,8 @@ estimate      se     zval    pval   ci.lb   ci.ub
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
-<div
-id="global-models-testing-if-an-increase-in-sexual-selection-correlates-with-an-increasingly-males-biased-ssd"
-class="section level1">
-<h1>Global models testing if an increase in sexual selection correlates
-with an increasingly males-biased SSD</h1>
+<div id="global-models-version-2" class="section level1">
+<h1>Global models Version 2</h1>
 <p>Next, we addressed the question if increasing sexual selection
 correlated with an increasingly male-biased SSD. For this we ran a
 global model including an observation-level index and the study
