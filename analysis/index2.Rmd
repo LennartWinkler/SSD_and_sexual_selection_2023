@@ -352,7 +352,7 @@ ggplot(MetaData, aes(x=BodySizeControlled, y=r, fill = BodySizeControlled, colou
   annotate("text", x=1, y=1.2, label= "n = 16",size=4.5)  + theme
 ```
 
-# Test for publication bias
+## Test for publication bias
 To test for publication bias, we transformed r into z scores and ran multilevel mixed-effects models (restricted maximum likelihood) with z as the predictor and its standard error as the response with study ID and an observation level random effect. Models were weight by the mean standard error of z across all studies. While the variance in r depends on the effect size and the sample size, the variance in z is only dependent on the sample size. Hence, if z values correlate with the variance in z, this indicates that small studies were only published, if the effect was large, suggesting publication bias.
 
 ```{r Test for publication bias, warning=FALSE, message=FALSE}
@@ -404,7 +404,7 @@ ggplot(MetaData, aes(x=log(as.numeric(TaxaNumber)), y=r)) +
 ## Publication year
 Next we explored the effect of the publication year of each study:
 ```{r Publication year, warning=FALSE, message=FALSE}
-Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML",control=list(rel.tol=1e-8))
 summary(Model_REML_by_Year)
 ```
 
@@ -413,7 +413,7 @@ summary(Model_REML_by_Year)
 Here we plot the publication yea:
 ```{r Figure S2F, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2F: Scatter plot of correlation coefficients against the publication year of each study. Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
 # Extract model predictions
-Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML",control=list(rel.tol=1e-8))
 model_p4 <- predict(Model_REML_by_Year)
 
 ggplot(MetaData, aes(x=as.numeric(Year), y=r)) +
@@ -425,49 +425,6 @@ ggplot(MetaData, aes(x=as.numeric(Year), y=r)) +
   geom_line( aes(y = model_p4$pred), size = 1)+ 
   geom_ribbon( aes(ymin = model_p4$ci.lb, ymax = model_p4$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
   theme
-```
-
-## Phylogentic vs non-phylogenetic studies
-Next we explored the effect of studies controlling for phylogeny vs non-phylogenetic studies:
-```{r Type of Phylogentic vs non-phylogenetic studies, warning=FALSE, message=FALSE}
-MetaData$PhyloControlled=as.factor(MetaData$PhyloControlled)
-MetaData$PhyloControlled=relevel(MetaData$PhyloControlled,c("No"))
-Model_cREML_by_Phylo = rma.mv(r ~ PhyloControlled, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_cREML_by_Phylo)
-```
-We then re-leveled the model for post-hoc comparisons:
-```{r Type of Phylogentic vs non-phylogenetic studies (re-leveled), warning=FALSE, message=FALSE, results='hide'}
-MetaData$PhyloControlled=relevel(MetaData$PhyloControlled,c("Yes"))
-Model_cREML_by_Phylo2 = rma.mv(r ~ PhyloControlled, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_cREML_by_Phylo2)
-```
-Finally, we computed FDR corrected p-values:
-```{r FDR corrected p-values for Phylogentic vs non-phylogenetic studies, warning=FALSE, message=FALSE}
-tab5=as.data.frame(round(p.adjust(c(0.0001, 0.0096), method = 'fdr'),digit=3),row.names=cbind("Non-phylogenetic","With phylogeny"))
-colnames(tab5)<-cbind('P-value')
-tab5
-```
-## Plot Type of SSD measure (Figure S3)
-
-Here we plot the type of SSD measure moderator:
-```{r Figure S3, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S3: Raincloud plot of correlation coefficients for non-phylogenetic and phylogenetic analyses in primary studies including sample sizes and estimates with 95%CI from phylogenetic model (Table 4).'}
-MetaData$PhyloControlled=as.factor(MetaData$PhyloControlled)
-MetaData$PhyloControlled=relevel(MetaData$PhyloControlled,c("No"))
-
-ggplot(MetaData, aes(x=PhyloControlled, y=r, fill = PhyloControlled, colour = PhyloControlled)) +
-  geom_hline(yintercept=0, linetype="longdash", color = "black", linewidth=1)+
-  geom_flat_violin(position = position_nudge(x = 0.25, y = 0),adjust =1, trim = F,alpha=0.6)+
-  geom_point(position = position_jitter(width = .1), size = 2.5,alpha=0.6,stroke=0,shape=19)+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Phylo2$b[1,1], x=2.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Phylo$b[1,1], x=1.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Phylo2$ci.lb[1], x=2.25, xend= 2.25, yend= Model_cREML_by_Phylo2$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Phylo$ci.lb[1], x=1.25, xend= 1.25, yend= Model_cREML_by_Phylo$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  ylab(expression(paste("Effect size (", italic("r"),')')))+xlab('Type of analysis')+coord_flip()+guides(fill = FALSE, colour = FALSE) +
-  scale_color_manual(values =colpal4)+
-  scale_fill_manual(values =colpal4)+
-  scale_x_discrete(labels=(c("Phylogenetically \n uncorrected ","Phylogenetically \n corrected ")),expand=c(.15,0))+
-  annotate("text", x=1, y=1.2, label= "n = 8",size=4.5) +
-  annotate("text", x=2, y=1.2, label= "n = 77",size=4.5)  + theme
 ```
 
 # Moderator tests for non-phylogenetic models
@@ -671,7 +628,7 @@ colnames(tab4)<-cbind('P-value')
 tab4
 ```
 
-# Test for publication bias
+## Test for publication bias
 
 ```{r Test for publication bias non-phylogenetic, warning=FALSE, message=FALSE}
 Model_cREML_PublBias         = rma.mv(z ~ SE_z, V=rep(mean(MetaData$SE_z),length(MetaData$SE_z)), data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
@@ -690,27 +647,6 @@ Next we explored the effect of the publication year of each study:
 ```{r Publication year non-phylogenetic models, warning=FALSE, message=FALSE}
 Model_cREML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
 summary(Model_cREML_by_Year)
-```
-
-## Phylogentic vs non-phylogenetic studies
-Next we explored the effect of studies controlling for phylogeny vs non-phylogenetic studies:
-```{r Type of Phylogentic vs non-phylogenetic studies non-phylogenetic models, warning=FALSE, message=FALSE}
-MetaData$PhyloControlled=as.factor(MetaData$PhyloControlled)
-MetaData$PhyloControlled=relevel(MetaData$PhyloControlled,c("No"))
-Model_cREML_by_cPhylo = rma.mv(r ~ PhyloControlled, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_cPhylo)
-```
-We then re-leveled the model for post-hoc comparisons:
-```{r Type of Phylogentic vs non-phylogenetic studies (re-leveled) non-phylogenetic models, warning=FALSE, message=FALSE, results='hide'}
-MetaData$PhyloControlled=relevel(MetaData$PhyloControlled,c("Yes"))
-Model_cREML_by_cPhylo2 = rma.mv(r ~ PhyloControlled, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_cPhylo2)
-```
-Finally, we computed FDR corrected p-values:
-```{r FDR corrected p-values for Phylogentic vs non-phylogenetic studies non-phylogenetic models, warning=FALSE, message=FALSE}
-tab5=as.data.frame(round(p.adjust(c(0.0001, 0.0001), method = 'fdr'),digit=3),row.names=cbind("Non-phylogenetic","With phylogeny"))
-colnames(tab5)<-cbind('P-value')
-tab5
 ```
 
 # Forest plot
