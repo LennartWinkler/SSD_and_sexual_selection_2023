@@ -75,7 +75,7 @@ Model_cREML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 
 summary(Model_cREML_Null)
 ```
 
-# Global model testing if increasing sexual selection correlates with an incease in SSD
+# Global model Version 1
 First, we tested if increasing sexual selection (estimated via diverse proxies; see Table S1) correlated with the degree of SSD. To this end we ran a global model on the absolute correlation coefficients extracted from primary studies (i.e. increasing sexual selection could correlate with a female- or male-bias in SSD, with all resulting correlation coefficients being positive). </br></br>
 First, we ran a global model including the phylogeny:
 ```{r Global phylogenetic Model V1, warning=FALSE, message=FALSE}
@@ -94,7 +94,7 @@ Model_cREML_Null         = rma.mv(absSSDcor ~ 1, V=Var_r, data = MetaData, rando
 summary(Model_cREML_Null)
 ```
 
-# Global models testing if an increase in sexual selection correlates with an increasingly males-biased SSD
+# Global models Version 2
 Next, we addressed the question if increasing sexual selection correlated with an increasingly male-biased SSD. For this we ran a global model including an observation-level index and the study identifier as random termson correlation coefficients that were positive if increasing sexual selection correlated with an increasingly male-biased SSD, but negative if increasing sexual selection correlated with an increasingly female-biased SSD. </br></br>
 First, we ran a global model including the phylogeny:
 ```{r Global phylogenetic Model V2, warning=FALSE, message=FALSE}
