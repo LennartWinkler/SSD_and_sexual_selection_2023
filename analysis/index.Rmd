@@ -237,33 +237,6 @@ ggplot(MetaData, aes(x=SexSel_Category, y=r, fill = SexSel_Category, colour = Se
   annotate("text", x=1, y=1.2, label= "n = 12",size=4.5) + theme
 ```
 
-## Sex-bias in SSD
-Next we explored the effect of the sex-bias in SSD (i.e. the proportion of female biased species within each study):
-```{r Sex-bias in SSD, warning=FALSE, message=FALSE}
-Model_REML_by_SSDBias = rma.mv(r ~ SSD_SexBias_in_perc_F, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_by_SSDBias)
-```
-
-## Plot sex-bias in SSD (Figure S2A)
-
-Here we plot the sex-bias in SSD:
-```{r Figure S2A, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2A: Scatter plot of correlation coefficients against the proportion of female biased species within each study. Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
-# Extract model predictions for figure
-Model_REML_by_SexBias = rma.mv(r ~ SSD_SexBias_in_perc_F, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-model_p <- predict(Model_REML_by_SexBias)
-MetaData_SexBias=MetaData[ !is.na(MetaData$SSD_SexBias_in_perc_F),]
-
-ggplot(MetaData_SexBias, aes(x=SSD_SexBias_in_perc_F, y=r)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.text=element_text(size=13),
-        axis.title=element_text(size=14))+ theme(legend.position="none")+
-  geom_point(shape=16, size = 3,alpha=0.5)+xlab('% female biased species')+ylab(expression(paste("Effect size (", italic("r"),')')))+
-  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
-  geom_line( aes(y = model_p$pred), size = 1)+ 
-  geom_ribbon( aes(ymin = model_p$ci.lb, ymax = model_p$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
-  theme
-```
-
 ## Type of SSD measure
 Next we explored the effect of the type of SSD measure (i.e. body mass or size):
 ```{r Type of SSD measure, warning=FALSE, message=FALSE}
@@ -285,10 +258,10 @@ colnames(tab3)<-cbind('P-value')
 tab3
 ```
 
-## Plot Type of SSD measure (Figure S2B)
+## Plot Type of SSD measure (Figure S2A)
 
 Here we plot the type of SSD measure moderator:
-```{r Figure S2B, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2B: Raincloud plot of correlation coefficients for different types of SSD measures (i.e. body mass or size) including sample sizes and estimates with 95%CI from phylogenetic model.'}
+```{r Figure S2A, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2A: Raincloud plot of correlation coefficients for different types of SSD measures (i.e. body mass or size) including sample sizes and estimates with 95% CI from phylogenetic model.'}
 MetaData_NAProxy=MetaData[!is.na(MetaData$SSD_Proxy),]
 MetaData_NAProxy$SSD_Proxy=as.factor(MetaData_NAProxy$SSD_Proxy)
 MetaData_NAProxy$SSD_Proxy=relevel(MetaData_NAProxy$SSD_Proxy,c("Body size"))
@@ -329,10 +302,10 @@ tab4=as.data.frame(round(p.adjust(c(0.0006, 0.0337), method = 'fdr'),digit=3),ro
 colnames(tab4)<-cbind('P-value')
 tab4
 ```
-## Plot: SSD measure controlled for body size? (Figure S2C)
+## Plot: SSD measure controlled for body size? (Figure S2B)
 
 Here we plot effect sizes if type of SSD measure controlled for body size:
-```{r Figure S2C, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2C: Raincloud plot of correlation coefficients for primary studies controlling SSD for body size or mass (uncontrolled or controlled) including sample sizes and estimates with 95%CI from phylogenetic model.'}
+```{r Figure S2B, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2B: Raincloud plot of correlation coefficients for primary studies controlling SSD for body size or mass (uncontrolled or controlled) including sample sizes and estimates with 95% CI from phylogenetic model.'}
 MetaData$BodySizeControlled=as.factor(MetaData$BodySizeControlled)
 MetaData$BodySizeControlled=relevel(MetaData$BodySizeControlled,c("Yes"))
 
@@ -350,81 +323,6 @@ ggplot(MetaData, aes(x=BodySizeControlled, y=r, fill = BodySizeControlled, colou
   scale_x_discrete(labels=(c("Controlled","Uncontrolled")),expand=c(.15,0))+
   annotate("text", x=2, y=1.2, label= "n = 69",size=4.5) +
   annotate("text", x=1, y=1.2, label= "n = 16",size=4.5)  + theme
-```
-
-# Test for publication bias
-To test for publication bias, we transformed r into z scores and ran multilevel mixed-effects models (restricted maximum likelihood) with z as the predictor and its standard error as the response with study ID and an observation level random effect. Models were weight by the mean standard error of z across all studies. While the variance in r depends on the effect size and the sample size, the variance in z is only dependent on the sample size. Hence, if z values correlate with the variance in z, this indicates that small studies were only published, if the effect was large, suggesting publication bias.
-
-```{r Test for publication bias, warning=FALSE, message=FALSE}
-Model_REML_PublBias         = rma.mv(z ~ SE_z, V=rep(mean(MetaData$SE_z),length(MetaData$SE_z)), data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML",control=list(rel.tol=1e-8))
-summary(Model_REML_PublBias)
-```
-
-## Figure S2D
-```{r Figure S2D, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2D: Scatter plot of the standard error in z scores of each study against the z score of each primary study (transformed correlation coefficients). Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
-# Extract model predictions
-model_p2 <- predict(Model_REML_PublBias)
-
-ggplot(MetaData, aes(x=SE_z, y=z)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.text=element_text(size=13),
-        axis.title=element_text(size=14))+ theme(legend.position="none")+ylab(expression(paste("Effect size (", italic("z"),')')))+
-  geom_point(shape=16, size = 3,alpha=0.5)+xlab('Standard error')+
-  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
-  geom_line( aes(y = model_p2$pred), size = 1)+ 
-  geom_ribbon( aes(ymin = model_p2$ci.lb, ymax = model_p2$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
-  theme
-```
-## Taxa number
-Next we explored the effect of the number of taxa within each study:
-```{r Taxa number, warning=FALSE, message=FALSE}
-Model_REML_by_TaxaNumber = rma.mv(r ~ TaxaNumber, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_by_TaxaNumber)
-```
-
-## Plot taxa number (Figure S2E)
-
-Here we plot the taxa number:
-```{r Figure S2E, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2E: Scatter plot of correlation coefficients against the natural logarithm of the number of taxa included in each study. Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
-# Extract model predictions
-Model_REML_by_TaxaNumber = rma.mv(r ~ log(TaxaNumber), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-model_p3 <- predict(Model_REML_by_TaxaNumber)
-
-ggplot(MetaData, aes(x=log(as.numeric(TaxaNumber)), y=r)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.text=element_text(size=13),
-        axis.title=element_text(size=14))+ theme(legend.position="none")+ylab(expression(paste("Effect size (", italic("r"),')')))+
-  geom_point(shape=16, size = 3,alpha=0.5)+xlab('log Taxa number')+
-  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
-  geom_line( aes(y = model_p3$pred), size = 1)+ 
-  geom_ribbon( aes(ymin = model_p3$ci.lb, ymax = model_p3$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
-  theme
-```
-
-## Publication year
-Next we explored the effect of the publication year of each study:
-```{r Publication year, warning=FALSE, message=FALSE}
-Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_by_Year)
-```
-
-## Plot publication year (Figure S2F)
-
-Here we plot the publication yea:
-```{r Figure S2F, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2F: Scatter plot of correlation coefficients against the publication year of each study. Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
-# Extract model predictions
-Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-model_p4 <- predict(Model_REML_by_Year)
-
-ggplot(MetaData, aes(x=as.numeric(Year), y=r)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.text=element_text(size=13),
-        axis.title=element_text(size=14))+ theme(legend.position="none")+
-  geom_point(shape=16, size = 3,alpha=0.5)+xlab('Publication year')+ylab(expression(paste("Effect size (", italic("r"),')')))+
-  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
-  geom_line( aes(y = model_p4$pred), size = 1)+ 
-  geom_ribbon( aes(ymin = model_p4$ci.lb, ymax = model_p4$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
-  theme
 ```
 
 ## Phylogentic vs non-phylogenetic studies
@@ -447,10 +345,11 @@ tab5=as.data.frame(round(p.adjust(c(0.0001, 0.0096), method = 'fdr'),digit=3),ro
 colnames(tab5)<-cbind('P-value')
 tab5
 ```
-## Plot Type of SSD measure (Figure S3)
+
+## Plot Phylogentic vs non-phylogenetic studies (Figure S2C)
 
 Here we plot the type of SSD measure moderator:
-```{r Figure S3, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S3: Raincloud plot of correlation coefficients for non-phylogenetic and phylogenetic analyses in primary studies including sample sizes and estimates with 95%CI from phylogenetic model (Table 4).'}
+```{r Figure S2C, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2C: Raincloud plot of correlation coefficients for non-phylogenetic and phylogenetic analyses in primary studies including sample sizes and estimates with 95% CI from phylogenetic model (Table 4).'}
 MetaData$PhyloControlled=as.factor(MetaData$PhyloControlled)
 MetaData$PhyloControlled=relevel(MetaData$PhyloControlled,c("No"))
 
@@ -468,6 +367,56 @@ ggplot(MetaData, aes(x=PhyloControlled, y=r, fill = PhyloControlled, colour = Ph
   scale_x_discrete(labels=(c("Phylogenetically \n uncorrected ","Phylogenetically \n corrected ")),expand=c(.15,0))+
   annotate("text", x=1, y=1.2, label= "n = 8",size=4.5) +
   annotate("text", x=2, y=1.2, label= "n = 77",size=4.5)  + theme
+```
+
+## Test for publication bias
+To test for publication bias, we transformed r into z scores and ran multilevel mixed-effects models (restricted maximum likelihood) with z as the predictor and its standard error as the response with study ID and an observation level random effect. Models were weight by the mean standard error of z across all studies. While the variance in r depends on the effect size and the sample size, the variance in z is only dependent on the sample size. Hence, if z values correlate with the variance in z, this indicates that small studies were only published, if the effect was large, suggesting publication bias.
+
+```{r Test for publication bias, warning=FALSE, message=FALSE}
+Model_REML_PublBias         = rma.mv(z ~ SE_z, V=rep((mean(SE_z)*mean(SE_z))*N,length(SE_z)), data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML",control=list(rel.tol=1e-8))
+summary(Model_REML_PublBias)
+```
+
+## Figure S2D
+```{r Figure S2D, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2D: Scatter plot of the standard error in z scores of each study against the z score of each primary study (transformed correlation coefficients). Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
+# Extract model predictions
+model_p2 <- predict(Model_REML_PublBias)
+
+ggplot(MetaData, aes(x=SE_z, y=z)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(axis.text=element_text(size=13),
+        axis.title=element_text(size=14))+ theme(legend.position="none")+ylab(expression(paste("Effect size (", italic("z"),')')))+
+  geom_point(shape=16, size = 3,alpha=0.5)+xlab('Standard error')+
+  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
+  geom_line( aes(y = model_p2$pred), size = 1)+ 
+  geom_ribbon( aes(ymin = model_p2$ci.lb, ymax = model_p2$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
+  theme
+```
+
+## Publication year
+Next we explored the effect of the publication year of each study:
+```{r Publication year, warning=FALSE, message=FALSE}
+Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_by_Year)
+```
+
+## Plot publication year (Figure S2E)
+
+Here we plot the publication year:
+```{r Figure S2E, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2E: Scatter plot of correlation coefficients against the publication year of each study. Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
+# Extract model predictions
+Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+model_p4 <- predict(Model_REML_by_Year)
+
+ggplot(MetaData, aes(x=as.numeric(Year), y=r)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(axis.text=element_text(size=13),
+        axis.title=element_text(size=14))+ theme(legend.position="none")+
+  geom_point(shape=16, size = 3,alpha=0.5)+xlab('Publication year')+ylab(expression(paste("Effect size (", italic("r"),')')))+
+  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
+  geom_line( aes(y = model_p4$pred), size = 1)+ 
+  geom_ribbon( aes(ymin = model_p4$ci.lb, ymax = model_p4$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
+  theme
 ```
 
 # Moderator tests for non-phylogenetic models
@@ -622,13 +571,6 @@ ggplot(MetaData, aes(x=Class, y=r, fill = Class, colour = Class)) +
   theme
 ```
 
-## Sex-bias in SSD
-Next we explored the effect of the sex-bias in SSD (i.e. the proportion of female biased species within each study):
-```{r Sex-bias in SSD non-phylogenetic models, warning=FALSE, message=FALSE}
-Model_cREML_by_SSDBias = rma.mv(r ~ SSD_SexBias_in_perc_F, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_SSDBias)
-```
-
 ## Type of SSD measure
 Next we explored the effect of the type of SSD measure (i.e. body mass or size):
 ```{r Type of SSD measure non-phylogenetic models, warning=FALSE, message=FALSE}
@@ -671,27 +613,6 @@ colnames(tab4)<-cbind('P-value')
 tab4
 ```
 
-# Test for publication bias
-
-```{r Test for publication bias non-phylogenetic, warning=FALSE, message=FALSE}
-Model_cREML_PublBias         = rma.mv(z ~ SE_z, V=rep(mean(MetaData$SE_z),length(MetaData$SE_z)), data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_PublBias)
-```
-
-## Taxa number
-Next we explored the effect of the number of taxa within each study:
-```{r Taxa number non-phylogenetic models, warning=FALSE, message=FALSE}
-Model_cREML_by_TaxaNumber = rma.mv(r ~ TaxaNumber, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_TaxaNumber)
-```
-
-## Publication year
-Next we explored the effect of the publication year of each study:
-```{r Publication year non-phylogenetic models, warning=FALSE, message=FALSE}
-Model_cREML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_Year)
-```
-
 ## Phylogentic vs non-phylogenetic studies
 Next we explored the effect of studies controlling for phylogeny vs non-phylogenetic studies:
 ```{r Type of Phylogentic vs non-phylogenetic studies non-phylogenetic models, warning=FALSE, message=FALSE}
@@ -711,6 +632,20 @@ Finally, we computed FDR corrected p-values:
 tab5=as.data.frame(round(p.adjust(c(0.0001, 0.0001), method = 'fdr'),digit=3),row.names=cbind("Non-phylogenetic","With phylogeny"))
 colnames(tab5)<-cbind('P-value')
 tab5
+```
+
+## Test for publication bias
+
+```{r Test for publication bias non-phylogenetic, warning=FALSE, message=FALSE}
+Model_cREML_PublBias         = rma.mv(z ~ SE_z, V=rep(((mean(SE_z)*mean(SE_z))*N),length(SE_z)), data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_PublBias)
+```
+
+## Publication year
+Next we explored the effect of the publication year of each study:
+```{r Publication year non-phylogenetic models, warning=FALSE, message=FALSE}
+Model_cREML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Year)
 ```
 
 # Forest plot
