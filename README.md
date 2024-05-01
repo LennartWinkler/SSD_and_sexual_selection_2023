@@ -1,5 +1,5 @@
-# SSD_and_sexual_selection_2023
+# SSD_and_sexual_selection_2024
 
-Website: https://lennartwinkler.github.io/SSD_and_sexual_selection_2023/
+Website: https://lennartwinkler.github.io/SSD_and_sexual_selection_2024/
 
 [workflowr]: https://github.com/workflowr/workflowr
