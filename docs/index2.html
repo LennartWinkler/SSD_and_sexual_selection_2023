@@ -477,7 +477,7 @@ CNRS, Université de Montpellier</br></h4>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+workflowr <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -488,8 +488,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> </a>
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -502,9 +502,9 @@ aria-hidden="true"></span> </a>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 1
+aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong>
@@ -528,21 +528,18 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
-changes </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguncommittedchanges"
+<div id="strongRMarkdownfilestronguptodate"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of
-the R Markdown file created these results, you’ll want to first commit
-it to the Git repo. If you’re still working on the analysis, you can
-ignore this warning. When you’re finished, you can run
-<code>wflow_publish</code> to commit the R Markdown file and build the
-HTML.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
@@ -633,15 +630,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023treeb028b7d8dc99232f1216ddbeb79bee4b7a6da485targetblankb028b7da">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023tree7fd037eafed03afba5719ca67fadb3cb2e1b0337targetblank7fd037ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/b028b7d8dc99232f1216ddbeb79bee4b7a6da485" target="_blank">b028b7d</a>
+<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/7fd037eafed03afba5719ca67fadb3cb2e1b0337" target="_blank">7fd037e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023treeb028b7d8dc99232f1216ddbeb79bee4b7a6da485targetblankb028b7da"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLennartWinklerSSDandsexualselection2023tree7fd037eafed03afba5719ca67fadb3cb2e1b0337targetblank7fd037ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -651,7 +648,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/b028b7d8dc99232f1216ddbeb79bee4b7a6da485" target="_blank">b028b7d</a>.
+<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/tree/7fd037eafed03afba5719ca67fadb3cb2e1b0337" target="_blank">7fd037e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -671,24 +668,6 @@ Ignored files:
 Untracked files:
     Untracked:  data/Data_SexSelSSD.csv
     Untracked:  data/Pyologeny_SexSelSSD.txt
-
-Unstaged changes:
-    Modified:   .Rprofile
-    Modified:   .gitattributes
-    Modified:   .gitignore
-    Modified:   README.md
-    Modified:   SSD_and_sexual_selection_2023.Rproj
-    Modified:   _workflowr.yml
-    Modified:   analysis/_site.yml
-    Modified:   analysis/about.Rmd
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/index2.Rmd
-    Modified:   analysis/license.Rmd
-    Modified:   code/README.md
-    Modified:   data/README.md
-    Deleted:    data/Supplement4_SexSelSSD_V01.csv
-    Deleted:    data/Supplement6_SexSelSSD_V01.txt
-    Modified:   output/README.md
 
 </code></pre>
 <p>
@@ -733,6 +712,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LennartWinkler/SSD_and_sexual_selection_2023/blob/7fd037eafed03afba5719ca67fadb3cb2e1b0337/analysis/index2.Rmd" target="_blank">7fd037e</a>
+</td>
+<td>
+LennartWinkler
+</td>
+<td>
+2024-05-01
+</td>
+<td>
+wflow_publish(all = T)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LennartWinkler/SSD_and_sexual_selection_2023/7fd037eafed03afba5719ca67fadb3cb2e1b0337/docs/index2.html" target="_blank">7fd037e</a>
+</td>
+<td>
+LennartWinkler
+</td>
+<td>
+2024-05-01
+</td>
+<td>
+wflow_publish(all = T)
+</td>
+</tr>
 <tr>
 <td>
 html
