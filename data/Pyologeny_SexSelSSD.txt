@@ -1,0 +1,1 @@
+(Animalia:375,(Nematoda:363.5,((Pisces:281.5,(Actinopterygii:215.5,(Amphibia:176.5,(Mammalia:159.5,(Reptilia:130.5,Aves:130.5):29):17):39):66):65.5,(Trematoda:305,(Insecta:257.5,Malacostraca:257.5):47.5):42):16.5):11.5);
