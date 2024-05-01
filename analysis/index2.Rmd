@@ -1,5 +1,5 @@
 ---
-title: 'Sexual selection and sexual size dimorphism: a meta-analysis of comparative studies'
+title: 'Pre-copulatory sexual selection predicts sexual size dimorphism: a meta-analysis of comparative studies'
 author: "Lennart Winkler^1^, Robert P Freckleton^2^, Tamas Szekely^3^, ^4^ & Tim Janicke^1,5^ <br></br>  ^1^Applied Zoology, Technical University Dresden </br></br>^2^Department of Zoology, University of Oxford, South Parks Road, Oxford OX1 3PS, UK<br></br>^3^Milner Centre for Evolution, University of Bath, Bath, UK8</br></br>^4^Department of Evolutionary Zoology and Human Behaviour, University of Debrecen, Debrecen, Hungary</br></br> ^5^Centre d’Écologie Fonctionnelle et Évolutive, UMR 5175, CNRS, Université de Montpellier</br>"
 subtitle: 'Additional analyses'
 site: workflowr::wflow_site
@@ -7,27 +7,27 @@ output:
   workflowr::wflow_html
 ---
 
-Supplementary material reporting R code for the manuscript 'Sexual selection and sexual size dimorphism: a meta-analysis of comparative studies'.
+Supplementary material reporting R code for the manuscript 'Pre-copulatory sexual selection predicts sexual size dimorphism: a meta-analysis of comparative studies'.
 </br>
-Additional analyses excluding studies that did not correct for phylogenetic non-independence (see Supplement 2).
+Additional analyses excluding studies that did not correct for phylogenetic non-independence (see Supporting Information).
 # Load and prepare data
 Before we started the analyses, we loaded all necessary packages and data.
 ```{r Load, message=FALSE, warning=FALSE, results='hide'}
 rm(list = ls()) # Clear work environment
 
 # Load R-packages ####
-list_of_packages=cbind('ape','matrixcalc','metafor','Matrix','MASS','pwr','psych','multcomp','data.table','ggplot2','RColorBrewer','MCMCglmm','ggdist','cowplot','PupillometryR','dplyr','wesanderson')
+list_of_packages=cbind('ape','matrixcalc','metafor','Matrix','MASS','pwr','psych','multcomp','data.table','ggplot2','RColorBrewer','MCMCglmm','ggdist','cowplot','PupillometryR','dplyr','wesanderson','gridExtra')
 lapply(list_of_packages, require, character.only = TRUE)
 
 # Load data set ####
-MetaData <- read.csv("./data/Supplement4_SexSelSSD_V01.csv", sep=";", header=TRUE) # Load data set
+MetaData <- read.csv("./data/Data_SexSelSSD.csv", sep=";", header=TRUE) # Load data set
 
-#Remove studies that did not correct for phylogenetic non-independence
+# Remove studies that did not correct for phylogenetic non-independence
 MetaData=MetaData[MetaData$PhyloControlled=='Yes',]
 
 N_Studies <- length(summary(as.factor(MetaData$Study_ID))) # Number of included primary studies
 
-Tree<- read.tree("./data/Supplement6_SexSelSSD_V01.txt") # Load phylogenetic tree
+Tree<- read.tree("./data/Pyologeny_SexSelSSD.txt") # Load phylogenetic tree
 
 # Prune phylogenetic tree
 MetaData_Class_Data <- unique(MetaData$Class)
@@ -35,75 +35,23 @@ Tree_Class<-drop.tip(Tree, Tree$tip.label[-na.omit(match(MetaData_Class_Data, Tr
 forcedC_Moderators <- as.matrix(forceSymmetric(vcv(Tree_Class, corr=TRUE)))
 
 # Order moderator levels
-MetaData$SexSel_Mode=as.factor(MetaData$SexSel_Mode)
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("post-copulatory"))
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("pre-copulatory"))
-MetaData$SexSel_Sex=as.factor(MetaData$SexSel_Sex)
-MetaData$SexSel_Sex=relevel(MetaData$SexSel_Sex,c("Male"))
-
-# Set figure theme and colors
-theme=theme(panel.border = element_blank(), 
-            panel.background = element_blank(),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(), 
-            legend.position = c(0.2,0.5),
-            legend.title = element_blank(),
-            legend.text = element_text(colour="black", size=12),
-            axis.line.x = element_line(colour = "black", size = 1),
-            axis.line.y = element_line(colour = "black", size = 1),
-            axis.text.x = element_text(face="plain", color="black", size=16, angle=0),
-            axis.text.y = element_text(face="plain", color="black", size=16, angle=0),
-            axis.title.x = element_text(size=16,face="plain", margin = margin(r=0,10,0,0)),
-            axis.title.y = element_text(size=16,face="plain", margin = margin(r=10,0,0,0)),
-            axis.ticks = element_line(size = 1),
-            axis.ticks.length = unit(.3, "cm"))
-
-colpal=c("#4DAF4A","#377EB8","#E41A1C")
-colpal2=brewer.pal(7, 'Dark2')
-colpal3=wes_palette('FantasticFox1', 9, type = c("continuous"))
-colpal4=c("grey50","grey65")
-Meta_col=c('grey85','grey50','grey20','black')
-
-# Global models ####
-
-# Phylogenetic Model
-Model_REML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_Null)
-
-# Non-phylogenetic Model
-Model_cREML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_Null)
+MetaData$SexSel_Episode=as.factor(MetaData$SexSel_Episode)
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("post-copulatory"))
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("pre-copulatory"))
+MetaData$Class=as.factor(MetaData$Class)
+MetaData$z=as.numeric(MetaData$z)
 ```
 
-# Global model Version 1
-First, we tested if increasing sexual selection (estimated via diverse proxies; see Table S1) correlated with the degree of SSD. To this end we ran a global model on the absolute correlation coefficients extracted from primary studies (i.e. increasing sexual selection could correlate with a female- or male-bias in SSD, with all resulting correlation coefficients being positive). </br></br>
+# Global models
+We addressed the question if increasing sexual selection correlated with an increasingly male-biased SSD. For this we ran a global model including an observation-level index and the study identifier as random termson correlation coefficients that were positive if increasing sexual selection correlated with an increasingly male-biased SSD, but negative if increasing sexual selection correlated with an increasingly female-biased SSD. </br></br>
 First, we ran a global model including the phylogeny:
-```{r Global phylogenetic Model V1, warning=FALSE, message=FALSE}
-# Set all correlation coeficients as positive
-MetaData$absSSDcor=NA
-MetaData$absSSDcor=abs(MetaData$r)
-# Phylogenetic Model
-Model_REML_Null         = rma.mv(absSSDcor ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_Null)
-```
-
-Second, we ran a global model without the phylogeny:
-```{r Global non-phylogenetic Model V1, warning=FALSE, message=FALSE}
-# Non-phylogenetic Model
-Model_cREML_Null         = rma.mv(absSSDcor ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_Null)
-```
-
-# Global models Version 2
-Next, we addressed the question if increasing sexual selection correlated with an increasingly male-biased SSD. For this we ran a global model including an observation-level index and the study identifier as random termson correlation coefficients that were positive if increasing sexual selection correlated with an increasingly male-biased SSD, but negative if increasing sexual selection correlated with an increasingly female-biased SSD. </br></br>
-First, we ran a global model including the phylogeny:
-```{r Global phylogenetic Model V2, warning=FALSE, message=FALSE}
+```{r Global phylogenetic Model, warning=FALSE, message=FALSE}
 Model_REML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
 summary(Model_REML_Null)
 ```
 
 Second, we ran a global model without the phylogeny:
-```{r Global non-phylogenetic Model V2, warning=FALSE, message=FALSE}
+```{r Global non-phylogenetic Model, warning=FALSE, message=FALSE}
 Model_cREML_Null         = rma.mv(r ~ 1, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
 summary(Model_cREML_Null)
 ```
@@ -112,54 +60,29 @@ summary(Model_cREML_Null)
 Next, we ran a series of models that test the effect of different moderators.</br>
 Again we started with models including the phylogeny.
 
-## Sexual selection mode
-The first model explores the effect of the sexual selection mode (i.e. pre-copulatory, post-copulatory or both):
-```{r Sexual selection mode, warning=FALSE, message=FALSE}
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("pre-copulatory"))
-Model_REML_by_SexSelMode = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_by_SexSelMode)
+## Sexual selection episode
+The first model explores the effect of the sexual selection episode (i.e. pre-copulatory, post-copulatory or both):
+```{r Sexual selection Episode, warning=FALSE, message=FALSE}
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("pre-copulatory"))
+Model_REML_by_SexSelEpisode = rma.mv(r ~ factor(SexSel_Episode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_by_SexSelEpisode)
 ```
 We then re-leveled the model for post-hoc comparisons:
-```{r Sexual selection mode (re-leveled), warning=FALSE, message=FALSE, results='hide'}
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("post-copulatory"))
-Model_REML_by_SexSelMode2 = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_by_SexSelMode2)
+```{r Sexual selection Episode (re-leveled), warning=FALSE, message=FALSE, results='hide'}
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("post-copulatory"))
+Model_REML_by_SexSelEpisode2 = rma.mv(r ~ factor(SexSel_Episode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_by_SexSelEpisode2)
 
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("both"))
-Model_REML_by_SexSelMode3 = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
-summary(Model_REML_by_SexSelMode3)
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("both"))
+Model_REML_by_SexSelEpisode3 = rma.mv(r ~ factor(SexSel_Episode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_by_SexSelEpisode3)
 ```
 Finally, we computed FDR corrected p-values:
-```{r FDR corrected p-values for Sexual selection mode, warning=FALSE, message=FALSE}
-tab1=as.data.frame(round(p.adjust(c(0.0029, 0.1203, .0001), method = 'fdr'),digit=3),row.names=cbind("Pre-copulatory","Post-copulatory","Both"))
+```{r FDR corrected p-values for Sexual selection Episode, warning=FALSE, message=FALSE}
+tab1=as.data.frame(round(p.adjust(c(0.0083, 0.3897, .0001), method = 'fdr'),digit=3),row.names=cbind("Pre-copulatory","Post-copulatory","Both"))
 colnames(tab1)<-cbind('P-value')
 tab1
 ```
-## Plot sexual selection mode (Figure 2)
-
-Here we plot the sexual selection mode moderator:
-```{r Figure 2, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure 2: Raincloud plot of correlation coefficients between SSD and the modes of sexual selection proxies (i.e. pre-copulatory, post-copulatory or both) including sample sizes and estimates with 95%CI from phylogenetic model.'}
-MetaData$SexSel_Mode=factor(MetaData$SexSel_Mode, levels = c("both","post-copulatory" ,"pre-copulatory"))
-
-ggplot(MetaData, aes(x=SexSel_Mode, y=r, fill = SexSel_Mode, colour = SexSel_Mode)) +
-  geom_hline(yintercept=0, linetype="longdash", color = "black", linewidth=1)+
-  geom_flat_violin(position = position_nudge(x = 0.25, y = 0),adjust =1, trim = F,alpha=0.6)+
-  geom_point(position = position_jitter(width = .1), size = 2.5,alpha=0.6,stroke=0,shape=19)+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode$b[1,1], x=3.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode2$b[1,1], x=2.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode3$b[1,1], x=1.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode$ci.lb[1], x=3.25, xend= 3.25, yend= Model_REML_by_SexSelMode$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode2$ci.lb[1], x=2.25, xend= 2.25, yend= Model_REML_by_SexSelMode2$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelMode3$ci.lb[1], x=1.25, xend= 1.25, yend= Model_REML_by_SexSelMode3$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  ylab(expression(paste("Effect size (", italic("r"),')')))+xlab('Sexual selection mode')+coord_flip()+guides(fill = FALSE, colour = FALSE) +
-  scale_color_manual(values =colpal)+
-  scale_fill_manual(values =colpal)+
-  scale_x_discrete(labels=c("Both","Post-copulatory" ,"Pre-copulatory"),expand=c(.1,0))+
-  annotate("text", x=1, y=1.2, label= "n = 37",size=4.5) +
-  annotate("text", x=2, y=1.2, label= "n = 9",size=4.5) +
-  annotate("text", x=3, y=1.2, label= "n = 39",size=4.5) + theme
-```
-
 ## Sexual selection category
 Next we explored the effect of the sexual selection category (i.e. density, mating system, operational sex ratio (OSR), post-mating competition, pre-mating competition, trait-based, other):
 ```{r Sexual selection category, warning=FALSE, message=FALSE}
@@ -196,47 +119,10 @@ summary(Model_REML_by_SexSelCat7)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Sexual selection category, warning=FALSE, message=FALSE}
-tab2=as.data.frame(round(p.adjust(c(0.0705, 0.5745, 0.1057, 0.0002, .0001, .0001, 0.0011), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
+tab2=as.data.frame(round(p.adjust(c(0.1933, 0.9494, 0.1121, 0.0013, 0.0001, .0001, 0.0004), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
 colnames(tab2)<-cbind('P-value')
 tab2
 ```
-## Plot sexual selection category (Figure S1)
-
-Here we plot the sexual selection category moderator:
-```{r Figure S1, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S1: Raincloud plot of correlation coefficients between SSD and different sexual selection categories including sample sizes and estimates with 95%CI from phylogenetic model.'}
-MetaData$SexSel_Category=factor(MetaData$SexSel_Category, levels = rev(c( "Postmating competition","Trait-based" ,"Density","Premating competition" ,"Mating system" , "OSR", "Other")))
-
-ggplot(MetaData, aes(x=SexSel_Category, y=r, fill = SexSel_Category, colour = SexSel_Category)) +
-  geom_hline(yintercept=0, linetype="longdash", color = "black", linewidth=1)+
-  geom_flat_violin(position = position_nudge(x = 0.25, y = 0),adjust =1, trim = F,alpha=0.6)+
-  geom_point(position = position_jitter(width = .1), size = 2.5,alpha=0.6,stroke=0,shape=19)+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat$b[1,1], x=7.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat2$b[1,1], x=6.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat3$b[1,1], x=5.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat4$b[1,1], x=4.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat5$b[1,1], x=3.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat6$b[1,1], x=2.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat7$b[1,1], x=1.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat$ci.lb[1], x=7.25, xend= 7.25, yend= Model_REML_by_SexSelCat$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat2$ci.lb[1], x=6.25, xend= 6.25, yend= Model_REML_by_SexSelCat2$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat3$ci.lb[1], x=5.25, xend= 5.25, yend= Model_REML_by_SexSelCat3$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat4$ci.lb[1], x=4.25, xend= 4.25, yend= Model_REML_by_SexSelCat4$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat5$ci.lb[1], x=3.25, xend= 3.25, yend= Model_REML_by_SexSelCat5$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat6$ci.lb[1], x=2.25, xend= 2.25, yend= Model_REML_by_SexSelCat6$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SexSelCat7$ci.lb[1], x=1.25, xend= 1.25, yend= Model_REML_by_SexSelCat7$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  ylab(expression(paste("Effect size (", italic("r"),')')))+xlab('Sexual selection category')+coord_flip()+guides(fill = FALSE, colour = FALSE) +
-  scale_color_manual(values =colpal2)+
-  scale_fill_manual(values =colpal2)+
-  scale_x_discrete(labels=rev(c( "Post-mating\ncompetition","Trait-based" ,"Density","Pre-mating\ncompetition" ,"Mating\nsystem" , "OSR", "Other")),expand=c(.1,0))+
-  annotate("text", x=7, y=1.2, label= "n = 9",size=4.5) +
-  annotate("text", x=6, y=1.2, label= "n = 12",size=4.5) +
-  annotate("text", x=5, y=1.2, label= "n = 5",size=4.5) +
-  annotate("text", x=4, y=1.2, label= "n = 18",size=4.5) +
-  annotate("text", x=3, y=1.2, label= "n = 23",size=4.5) +
-  annotate("text", x=2, y=1.2, label= "n = 6",size=4.5) +
-  annotate("text", x=1, y=1.2, label= "n = 12",size=4.5) + theme
-```
-
 ## Type of SSD measure
 Next we explored the effect of the type of SSD measure (i.e. body mass or size):
 ```{r Type of SSD measure, warning=FALSE, message=FALSE}
@@ -253,35 +139,10 @@ summary(Model_REML_by_SSDMeasure2)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Type of SSD measure, warning=FALSE, message=FALSE}
-tab3=as.data.frame(round(p.adjust(c(0.0004, 0.0008), method = 'fdr'),digit=3),row.names=cbind("Body mass","Body size"))
+tab3=as.data.frame(round(p.adjust(c(.0001, 0.0082), method = 'fdr'),digit=3),row.names=cbind("Body mass","Body size"))
 colnames(tab3)<-cbind('P-value')
 tab3
 ```
-
-## Plot Type of SSD measure (Figure S2A)
-
-Here we plot the type of SSD measure moderator:
-```{r Figure S2A, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2A: Raincloud plot of correlation coefficients for different types of SSD measures (i.e. body mass or size) including sample sizes and estimates with 95% CI from phylogenetic model.'}
-MetaData_NAProxy=MetaData[!is.na(MetaData$SSD_Proxy),]
-MetaData_NAProxy$SSD_Proxy=as.factor(MetaData_NAProxy$SSD_Proxy)
-MetaData_NAProxy$SSD_Proxy=relevel(MetaData_NAProxy$SSD_Proxy,c("Body size"))
-
-ggplot(MetaData_NAProxy, aes(x=SSD_Proxy, y=r, fill = SSD_Proxy, colour = SSD_Proxy)) +
-  geom_hline(yintercept=0, linetype="longdash", color = "black", linewidth=1)+
-  geom_flat_violin(position = position_nudge(x = 0.25, y = 0),adjust =1, trim = F,alpha=0.6)+
-  geom_point(position = position_jitter(width = .1), size = 2.5,alpha=0.6,stroke=0,shape=19)+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SSDMeasure$b[1,1], x=2.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_SSDMeasure2$b[1,1], x=1.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SSDMeasure$ci.lb[1], x=2.25, xend= 2.25, yend= Model_REML_by_SSDMeasure$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_SSDMeasure2$ci.lb[1], x=1.25, xend= 1.25, yend= Model_REML_by_SSDMeasure2$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  ylab(expression(paste("Effect size (", italic("r"),')')))+xlab('Type of SSD measure')+coord_flip()+guides(fill = FALSE, colour = FALSE) +
-  scale_color_manual(values =colpal4)+
-  scale_fill_manual(values =colpal4)+
-  scale_x_discrete(labels=rev(c("Body mass","Body size")),expand=c(.15,0))+
-  annotate("text", x=2, y=1.2, label= "n = 37",size=4.5) +
-  annotate("text", x=1, y=1.2, label= "n = 46",size=4.5)  + theme
-```
-
 ## SSD measure controlled for body size?
 Next we explored the effect if the primary study controlled the SSD for body size (i.e. uncontrolled or controlled):
 ```{r SSD measure controlled, warning=FALSE, message=FALSE}
@@ -298,33 +159,20 @@ summary(Model_REML_by_BodySizeCont2)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for SSD measure controlled, warning=FALSE, message=FALSE}
-tab4=as.data.frame(round(p.adjust(c(0.0006, 0.0337), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
+tab4=as.data.frame(round(p.adjust(c(0.0115, 0.1222), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
 colnames(tab4)<-cbind('P-value')
 tab4
 ```
-## Plot: SSD measure controlled for body size? (Figure S2B)
 
-Here we plot effect sizes if type of SSD measure controlled for body size:
-```{r Figure S2B, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8,fig.height=7, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2B: Raincloud plot of correlation coefficients for primary studies controlling SSD for body size or mass (uncontrolled or controlled) including sample sizes and estimates with 95% CI from phylogenetic model.'}
-MetaData$BodySizeControlled=as.factor(MetaData$BodySizeControlled)
-MetaData$BodySizeControlled=relevel(MetaData$BodySizeControlled,c("Yes"))
+## Percentage of species with female-biased SSD
+There was variation in the primary studies regarding the typical SSD in the studied taxa (i.e. some studies focused on taxa with more male-biased SSD, while others on taxa with more female-biased SSD). Still, there was no significant relationship between the percentage of species with a female-biased SSD and effect sizes.
 
-ggplot(MetaData, aes(x=BodySizeControlled, y=r, fill = BodySizeControlled, colour = BodySizeControlled)) +
-  geom_hline(yintercept=0, linetype="longdash", color = "black", linewidth=1)+
-  geom_flat_violin(position = position_nudge(x = 0.25, y = 0),adjust =1, trim = F,alpha=0.6)+
-  geom_point(position = position_jitter(width = .1), size = 2.5,alpha=0.6,stroke=0,shape=19)+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_BodySizeCont$b[1,1], x=2.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_REML_by_BodySizeCont2$b[1,1], x=1.25), size = 3.5,alpha=1,stroke=0,shape=19,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_BodySizeCont$ci.lb[1], x=2.25, xend= 2.25, yend= Model_REML_by_BodySizeCont$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_REML_by_BodySizeCont2$ci.lb[1], x=1.25, xend= 1.25, yend= Model_REML_by_BodySizeCont2$ci.ub[1]), alpha=1,linewidth=1,color='grey30')+
-  ylab(expression(paste("Effect size (", italic("r"),')')))+xlab('SSD controlled for body size?')+coord_flip()+guides(fill = FALSE, colour = FALSE) +
-  scale_color_manual(values =colpal4)+
-  scale_fill_manual(values =colpal4)+
-  scale_x_discrete(labels=(c("Controlled","Uncontrolled")),expand=c(.15,0))+
-  annotate("text", x=2, y=1.2, label= "n = 69",size=4.5) +
-  annotate("text", x=1, y=1.2, label= "n = 16",size=4.5)  + theme
+```{r Percentage of species with female-biased SSD, warning=FALSE, message=FALSE}
+MetaData_SSDbias=MetaData
+MetaData_SSDbias=MetaData_SSDbias[!is.na(MetaData_SSDbias$SSD_SexBias_in_perc_F),]
+Model_REML_SSbias         = rma.mv(r ~ SSD_SexBias_in_perc_F, V=Var_r, data = MetaData_SSDbias, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
+summary(Model_REML_SSbias)
 ```
-
 ## Test for publication bias
 To test for publication bias, we transformed r into z scores and ran multilevel mixed-effects models (restricted maximum likelihood) with z as the predictor and its standard error as the response with study ID and an observation level random effect. Models were weight by the mean standard error of z across all studies. While the variance in r depends on the effect size and the sample size, the variance in z is only dependent on the sample size. Hence, if z values correlate with the variance in z, this indicates that small studies were only published, if the effect was large, suggesting publication bias.
 
@@ -332,72 +180,36 @@ To test for publication bias, we transformed r into z scores and ran multilevel 
 Model_REML_PublBias         = rma.mv(z ~ SE_z, V=rep((mean(SE_z)*mean(SE_z))*N,length(SE_z)), data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML",control=list(rel.tol=1e-8))
 summary(Model_REML_PublBias)
 ```
-
-## Figure S2D
-```{r Figure S2D, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2D: Scatter plot of the standard error in z scores of each study against the z score of each primary study (transformed correlation coefficients). Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
-# Extract model predictions
-model_p2 <- predict(Model_REML_PublBias)
-
-ggplot(MetaData, aes(x=SE_z, y=z)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.text=element_text(size=13),
-        axis.title=element_text(size=14))+ theme(legend.position="none")+ylab(expression(paste("Effect size (", italic("z"),')')))+
-  geom_point(shape=16, size = 3,alpha=0.5)+xlab('Standard error')+
-  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
-  geom_line( aes(y = model_p2$pred), size = 1)+ 
-  geom_ribbon( aes(ymin = model_p2$ci.lb, ymax = model_p2$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
-  theme
-```
-
 ## Publication year
 Next we explored the effect of the publication year of each study:
 ```{r Publication year, warning=FALSE, message=FALSE}
-Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML",control=list(rel.tol=1e-8))
+Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML")
 summary(Model_REML_by_Year)
-```
-
-## Plot publication year (Figure S2E)
-
-Here we plot the publication year:
-```{r Figure S2E, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure S2E: Scatter plot of correlation coefficients against the publication year of each study. Dashed line marks a correlation coefficient of zero, black line represents predictions from REML model (controlling for phylogeny) and grey area represents 95% CI on model predictions.'}
-# Extract model predictions
-Model_REML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index, ~ 1 | Class), R = list(Class = forcedC_Moderators), method = "REML",control=list(rel.tol=1e-8))
-model_p4 <- predict(Model_REML_by_Year)
-
-ggplot(MetaData, aes(x=as.numeric(Year), y=r)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank(), axis.line = element_line(colour = "black"))+
-  theme(axis.text=element_text(size=13),
-        axis.title=element_text(size=14))+ theme(legend.position="none")+
-  geom_point(shape=16, size = 3,alpha=0.5)+xlab('Publication year')+ylab(expression(paste("Effect size (", italic("r"),')')))+
-  geom_hline(yintercept=0, linetype="dashed", color = "black", linewidth=1)+
-  geom_line( aes(y = model_p4$pred), size = 1)+ 
-  geom_ribbon( aes(ymin = model_p4$ci.lb, ymax = model_p4$ci.ub, color = 'black',linetype=NA), alpha = .15,show.legend = F, outline.type = "both") +
-  theme
 ```
 
 # Moderator tests for non-phylogenetic models
 Here we ran all models without the phylogeny.
 
-## Sexual selection mode
-The first model explores the effect of the sexual selection mode (i.e. pre-copulatory, post-copulatory or both):
-```{r Sexual selection mode non-phylogenetic models, warning=FALSE, message=FALSE}
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("pre-copulatory"))
-Model_REML_by_cSexSelMode = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_REML_by_cSexSelMode)
+## Sexual selection episode
+The first model explores the effect of the sexual selection episode (i.e. pre-copulatory, post-copulatory or both):
+```{r Sexual selection Episode non-phylogenetic models, warning=FALSE, message=FALSE}
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("pre-copulatory"))
+Model_REML_by_cSexSelEpisode = rma.mv(r ~ factor(SexSel_Episode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_REML_by_cSexSelEpisode)
 ```
 We then re-leveled the model for post-hoc comparisons:
-```{r Sexual selection mode (re-leveled) non-phylogenetic models, warning=FALSE, message=FALSE, results='hide'}
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("post-copulatory"))
-Model_REML_by_cSexSelMode2 = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_REML_by_cSexSelMode2)
+```{r Sexual selection Episode (re-leveled) non-phylogenetic models, warning=FALSE, message=FALSE, results='hide'}
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("post-copulatory"))
+Model_REML_by_cSexSelEpisode2 = rma.mv(r ~ factor(SexSel_Episode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_REML_by_cSexSelEpisode2)
 
-MetaData$SexSel_Mode=relevel(MetaData$SexSel_Mode,c("both"))
-Model_REML_by_cSexSelMode3 = rma.mv(r ~ factor(SexSel_Mode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index),  method = "REML")
-summary(Model_REML_by_cSexSelMode3)
+MetaData$SexSel_Episode=relevel(MetaData$SexSel_Episode,c("both"))
+Model_REML_by_cSexSelEpisode3 = rma.mv(r ~ factor(SexSel_Episode), V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index),  method = "REML")
+summary(Model_REML_by_cSexSelEpisode3)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Sexual selection mode non-phylogenetic models, warning=FALSE, message=FALSE}
-tab1=as.data.frame(round(p.adjust(c(0.0001, 0.0756, .0001), method = 'fdr'),digit=3),row.names=cbind("Pre-copulatory","Post-copulatory","Both"))
+tab1=as.data.frame(round(p.adjust(c(0.0001, 0.3058, .0001), method = 'fdr'),digit=3),row.names=cbind("Pre-copulatory","Post-copulatory","Both"))
 colnames(tab1)<-cbind('P-value')
 tab1
 ```
@@ -438,7 +250,7 @@ summary(Model_REML_by_cSexSelCat7)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Sexual selection category non-phylogenetic models, warning=FALSE, message=FALSE}
-tab2=as.data.frame(round(p.adjust(c(0.0685, 0.5996, 0.0151, .0001, .0001, .0001, .0001), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
+tab2=as.data.frame(round(p.adjust(c(0.2833, 0.9816, 0.0176, .0001, .0001, .0001, .0001), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
 colnames(tab2)<-cbind('P-value')
 tab2
 ```
@@ -446,85 +258,51 @@ tab2
 ## Phylogenetic classes
 Next we explored the effect of the phylogenetic classes:
 ```{r Phylogenetic classes, warning=FALSE, message=FALSE}
-MetaData$Class=as.factor(MetaData$Class)
-MetaData$Class=relevel(MetaData$Class,c("Nematoda"))
-Model_cREML_by_Class = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_Class)
-```
-We then re-leveled the model for post-hoc comparisons:
-```{r Phylogenetic classes (re-leveled), warning=FALSE, message=FALSE, results='hide'}
-MetaData$Class=relevel(MetaData$Class,c("Insecta"))
-Model_cREML_by_Class2 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_Class2)
-
-MetaData$Class=relevel(MetaData$Class,c("Aves"))
-Model_cREML_by_Class3 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_Class3)
-
-MetaData$Class=relevel(MetaData$Class,c("Reptilia"))
-Model_cREML_by_Class4 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_Class4)
-
-MetaData$Class=relevel(MetaData$Class,c("Mammalia"))
+MetaData$Class=relevel(MetaData$Class,c("Actinopterygii"))
 Model_cREML_by_Class5 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
 summary(Model_cREML_by_Class5)
 
 MetaData$Class=relevel(MetaData$Class,c("Amphibia"))
-Model_cREML_by_Class6 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_Class6)
+Model_cREML_by_Class4 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Class4)
 
-MetaData$Class=relevel(MetaData$Class,c("Actinopterygii"))
-Model_cREML_by_Class7 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
-summary(Model_cREML_by_Class7)
+MetaData$Class=relevel(MetaData$Class,c("Animalia"))
+Model_cREML_by_Class11 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Class11)
 
+MetaData$Class=relevel(MetaData$Class,c("Aves"))
+Model_cREML_by_Class = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Class)
 
-MetaData$Class=relevel(MetaData$Class,c("Pisces"))
+MetaData$Class=relevel(MetaData$Class,c("Insecta"))
 Model_cREML_by_Class8 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
 summary(Model_cREML_by_Class8)
 
-MetaData$Class=relevel(MetaData$Class,c("Animalia"))
+MetaData$Class=relevel(MetaData$Class,c("Mammalia"))
+Model_cREML_by_Class3 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Class3)
+
+MetaData$Class=relevel(MetaData$Class,c("Nematoda"))
+Model_cREML_by_Class10 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Class10)
+
+MetaData$Class=relevel(MetaData$Class,c("Pisces"))
+Model_cREML_by_Class6 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Class6)
+
+MetaData$Class=relevel(MetaData$Class,c("Reptilia"))
+Model_cREML_by_Class2 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_by_Class2)
+
+MetaData$Class=relevel(MetaData$Class,c("Trematoda"))
 Model_cREML_by_Class9 = rma.mv(r ~ Class, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
 summary(Model_cREML_by_Class9)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Phylogenetic classes, warning=FALSE, message=FALSE}
-tab2=as.data.frame(round(p.adjust(c(0.2557       ,0.4534     , 0.3747    ,0.0048    ,0.0016    ,.0001  ,0.1202    , 0.3966  ,0.4405       ), method = 'fdr'),digit=3),row.names=cbind( "Nematoda","Insecta","Aves","Reptilia","Mammalia","Amphibia","Actinopterygii","Pisces","Animalia"))
+tab2=as.data.frame(round(p.adjust(c(0.0042, 0.8853, .0001, 0.4463, 0.0537, 0.3192, 0.0587, 0.9535, 0.0503, 0.2432), method = 'fdr'),digit=3),row.names=cbind( "Animalia","Nematoda","Trematoda","Insecta","Pisces" ,"Actinopterygii","Amphibia","Mammalia","Reptilia","Aves"))
 colnames(tab2)<-cbind('P-value')
 tab2
-```
-## Plot phylogenetic classes (Figure 3)
-
-Here we plot the phylogenetic classes:
-```{r Figure 3, warning=FALSE, message=FALSE, fig.align="left",fig.width = 7,fig.height=5, results='hide', fig.fullwidth=TRUE,fig.cap='Figure 3: Phylogeny based on classes including sample sizes for the number of studies and number of effect sizes, respectively, and estimates with 95%CI from non-phylogenetic model.'}
-MetaData$Class=as.factor(MetaData$Class)
-MetaData$Class=factor(MetaData$Class, levels = (c("Animalia","Pisces" ,"Actinopterygii","Amphibia","Mammalia","Reptilia","Aves","Insecta","Nematoda")))
-
-ggplot(MetaData, aes(x=Class, y=r, fill = Class, colour = Class)) +
-  geom_hline(yintercept=0, linetype="longdash", color = "black", linewidth=1)+
-  geom_point(position = position_jitter(width = .1), size = 2.5,alpha=0.8,stroke=0,shape=19)+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class$b[1,1], x=9.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[9])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class2$b[1,1], x=8.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[8])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class3$b[1,1], x=7.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[7])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class4$b[1,1], x=6.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[6])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class5$b[1,1], x=5.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[5])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class6$b[1,1], x=4.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[4])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class7$b[1,1], x=3.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[3])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class8$b[1,1], x=2.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[2])+
-  geom_point(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class9$b[1,1], x=1.35), size = 3.5,alpha=1,stroke=0,shape=19,color=colpal3[1])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class$ci.lb[1], x=9.35, xend= 9.35, yend= Model_cREML_by_Class$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[9])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class2$ci.lb[1], x=8.35, xend= 8.35, yend= Model_cREML_by_Class2$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[8])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class3$ci.lb[1], x=7.35, xend= 7.35, yend= Model_cREML_by_Class3$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[7])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class4$ci.lb[1], x=6.35, xend= 6.35, yend= Model_cREML_by_Class4$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[6])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class5$ci.lb[1], x=5.35, xend= 5.35, yend= Model_cREML_by_Class5$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[5])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class6$ci.lb[1], x=4.35, xend= 4.35, yend= Model_cREML_by_Class6$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[4])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class7$ci.lb[1], x=3.35, xend= 3.35, yend= Model_cREML_by_Class7$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[3])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class8$ci.lb[1], x=2.35, xend= 2.35, yend= Model_cREML_by_Class8$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[2])+
-  geom_segment(inherit.aes = F,mapping = aes(y=Model_cREML_by_Class9$ci.lb[1], x=1.35, xend= 1.35, yend= Model_cREML_by_Class9$ci.ub[1]), alpha=1,linewidth=1,color=colpal3[1])+
-  ylab(expression(paste("Effect size (", italic("r"),')')))+xlab('Class')+coord_flip()+guides(fill = FALSE, colour = FALSE) +
-  scale_color_manual(values =colpal3)+
-  scale_fill_manual(values =colpal3)+
-  scale_x_discrete(labels=(c("Animalia","Pisces" ,"Actinopterygii","Amphibia","Mammalia","Reptilia","Aves","Insecta","Nematoda")),expand=c(.1,0))+
-  theme
 ```
 
 ## Type of SSD measure
@@ -543,7 +321,7 @@ summary(Model_REML_by_cSSDMeasure2)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Type of SSD measure non-phylogenetic models, warning=FALSE, message=FALSE}
-tab3=as.data.frame(round(p.adjust(c(.0001, .0001), method = 'fdr'),digit=3),row.names=cbind("Body mass","Body size"))
+tab3=as.data.frame(round(p.adjust(c(.0001, 0.0006), method = 'fdr'),digit=3),row.names=cbind("Body mass","Body size"))
 colnames(tab3)<-cbind('P-value')
 tab3
 ```
@@ -564,9 +342,16 @@ summary(Model_REML_by_cBodySizeCont2)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for SSD measure controlled non-phylogenetic models, warning=FALSE, message=FALSE}
-tab4=as.data.frame(round(p.adjust(c(.0001, 0.0168), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
+tab4=as.data.frame(round(p.adjust(c(.0001, 0.0712), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
 colnames(tab4)<-cbind('P-value')
 tab4
+```
+
+## Percentage of species with female-biased SSD
+
+```{r Percentage of species with female-biased SSD non-phylogenetic, warning=FALSE, message=FALSE}
+Model_cREML_SSbias         = rma.mv(r ~ SSD_SexBias_in_perc_F, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
+summary(Model_cREML_SSbias)
 ```
 
 ## Test for publication bias
@@ -581,35 +366,4 @@ Next we explored the effect of the publication year of each study:
 ```{r Publication year non-phylogenetic models, warning=FALSE, message=FALSE}
 Model_cREML_by_Year = rma.mv(r ~ Year, V=Var_r, data = MetaData, random = c(~ 1 | Study_ID,~ 1 | Index), method = "REML")
 summary(Model_cREML_by_Year)
-```
-
-# Forest plot
-```{r Forest plot setup, warning=FALSE, message=FALSE, results='hide'}
-# Sort data by Class
-MetaData$Class=as.factor(MetaData$Class)
-MetaData$Class=factor(MetaData$Class, levels = c("Animalia","Pisces" ,"Actinopterygii","Amphibia","Mammalia","Reptilia","Aves","Insecta","Nematoda"))
-MetaData_sorted <-MetaData[order(MetaData$Class),]
-
-# Add global effect size to data
-forestData=MetaData_sorted[,c(3,5,12,17,20,21)]
-GlobalES=as.data.frame(cbind('Global effect size','','Global effect size',Model_REML_Null$b[1,1],Model_REML_Null$ci.lb[1],Model_REML_Null$ci.ub[1]))
-colnames(GlobalES)=c('AuthorsAndYear','Class','SexSel_Mode','r','lCI','uCI')
-forestData=rbind(GlobalES,forestData)
-forestData[,c(4:6)]=lapply(forestData[,c(4:6)],as.numeric)
-forestData$SexSel_Mode=as.factor(forestData$SexSel_Mode)
-forestData$SexSel_Mode=factor(forestData$SexSel_Mode, levels = c("pre-copulatory","post-copulatory" ,"both","Global effect size"))
-```
-
-## Figure 1
-```{r Figure 1, warning=FALSE, message=FALSE, fig.align="left",fig.width = 8.27,fig.height=11.69, results='hide', fig.fullwidth=TRUE,fig.cap='Figure 1: Forest plot including correlation coefficients (±95% CI), as well as the global effect size (in grey) with and without controlling for phylogeny. Different animal classes highlighted by background colors (see Figure 3 for class names) and sexual selection modes pre- (red), post-copulatory (blue) and both (green) by color of effect size.'}
-ggplot(data=forestData, aes(y=1:nrow(forestData), x=r, xmin=lCI, xmax=uCI,color=SexSel_Mode)) +
-  geom_vline(xintercept=0, color='black', linetype='dashed', alpha=.5,linewidth=0.8) +
-  geom_point(size = ifelse(1:nrow(forestData) == c(1), 2.75, 1.8))+
-  geom_errorbarh(height=0,size = ifelse(1:nrow(forestData) == c(1), 1.25, 1))+
-  scale_y_continuous(breaks=seq(1, nrow(forestData), by=1), labels=forestData$AuthorsAndYear,limits=c(1,length(forestData$AuthorsAndYear)),expand=c(0.015,0.015)) +
-  labs(title='', x=expression(paste(italic("r "),'(95% CI)')), y = 'Study') +
-  theme_classic()+theme(axis.text.x=element_text(size=12),
-                        axis.title=element_text(size=12))+ labs(color =  c("Sexual selection mode"))+ 
-  scale_colour_manual(values=Meta_col, labels=c('Pre-copulatory','Post-copulatory',"Both","Global effect size"))+
-  guides(color = guide_legend(override.aes = list(size = .9)))
 ```
