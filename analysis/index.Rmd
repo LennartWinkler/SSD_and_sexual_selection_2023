@@ -11,7 +11,7 @@ Supplementary material reporting R code for the manuscript 'Pre-copulatory sexua
 </br></br>
 Additional analyses excluding studies that did not control for phylogenetic non-independence (Supplement 2) can be found at:
 </br>
-https://https://lennartwinkler.github.io/SSD_and_sexual_selection_2023/index2.html
+https://https://lennartwinkler.github.io/SSD_and_sexual_selection_2024/index2.html
 </br>
 # Load and prepare data
 Before we started the analyses, we loaded all necessary packages and data.
