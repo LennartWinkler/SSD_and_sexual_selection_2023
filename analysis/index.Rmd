@@ -105,7 +105,7 @@ summary(Model_REML_by_SexSelEpisode3)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Sexual selection episode, warning=FALSE, message=FALSE}
-tab1=as.data.frame(round(p.adjust(c(.0001, 0.3004, .0001), method = 'fdr'),digit=3),row.names=cbind("Pre-copulatory","Post-copulatory","Both"))
+tab1=as.data.frame(round(p.adjust(c(0.0005, 0.2849, .0001), method = 'fdr'),digit=3),row.names=cbind("Pre-copulatory","Post-copulatory","Both"))
 colnames(tab1)<-cbind('P-value')
 tab1
 ```
@@ -129,9 +129,9 @@ ggplot(MetaData, aes(x=SexSel_Episode, y=r, fill = SexSel_Episode, colour = SexS
   scale_color_manual(values =colpal)+
   scale_fill_manual(values =colpal)+
   scale_x_discrete(labels=c("Pre- and      \n post-copulatory","Post-copulatory" ,"Pre-copulatory"),expand=c(.1,0))+
-  annotate("text", x=1, y=1.2, label= "n = 48",size=4.5) +
+  annotate("text", x=1, y=1.2, label= "n = 52",size=4.5) +
   annotate("text", x=2, y=1.2, label= "n = 19",size=4.5) +
-  annotate("text", x=3, y=1.2, label= "n = 55",size=4.5) + theme
+  annotate("text", x=3, y=1.2, label= "n = 56",size=4.5) + theme
 ```
 
 ## Sexual selection category
@@ -170,7 +170,7 @@ summary(Model_REML_by_SexSelCat7)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Sexual selection category, warning=FALSE, message=FALSE}
-tab2=as.data.frame(round(p.adjust(c(0.1834, 0.8561, 0.0826, .0001, .0001, .0001, 0.0002), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
+tab2=as.data.frame(round(p.adjust(c(0.1888, 0.9711, 0.0722, .0001, .0001, .0001, .0001), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
 colnames(tab2)<-cbind('P-value')
 tab2
 ```
@@ -203,11 +203,11 @@ ggplot(MetaData, aes(x=SexSel_Category, y=r, fill = SexSel_Category, colour = Se
   scale_fill_manual(values =colpal2)+
   scale_x_discrete(labels=rev(c( "Post-mating\ncompetition","Trait-based" ,"Population\ndensity","Pre-mating\ncompetition" ,"Mating\nsystem" , "Sex ratio", "Other")),expand=c(.1,0))+
   annotate("text", x=7, y=1.2, label= "n = 19",size=4.5) +
-  annotate("text", x=6, y=1.2, label= "n = 17",size=4.5) +
+  annotate("text", x=6, y=1.2, label= "n = 18",size=4.5) +
   annotate("text", x=5, y=1.2, label= "n = 5",size=4.5) +
-  annotate("text", x=4, y=1.2, label= "n = 22",size=4.5) +
+  annotate("text", x=4, y=1.2, label= "n = 25",size=4.5) +
   annotate("text", x=3, y=1.2, label= "n = 36",size=4.5) +
-  annotate("text", x=2, y=1.2, label= "n = 6",size=4.5) +
+  annotate("text", x=2, y=1.2, label= "n = 7",size=4.5) +
   annotate("text", x=1, y=1.2, label= "n = 17",size=4.5) + theme
 ```
 
@@ -252,8 +252,8 @@ ggplot(MetaData_NAProxy, aes(x=SSD_Proxy, y=r, fill = SSD_Proxy, colour = SSD_Pr
   scale_color_manual(values =colpal4)+
   scale_fill_manual(values =colpal4)+
   scale_x_discrete(labels=rev(c("Body \nmass ","Body \n size ")),expand=c(.15,0))+
-  annotate("text", x=2, y=1.1, label= "n = 57",size=3.5) +
-  annotate("text", x=1, y=1.1, label= "n = 63",size=3.5)  + theme
+  annotate("text", x=2, y=1.1, label= "n = 58",size=3.5) +
+  annotate("text", x=1, y=1.1, label= "n = 67",size=3.5)  + theme
 ```
 
 ## SSD measure controlled for body size?
@@ -272,7 +272,7 @@ summary(Model_REML_by_BodySizeCont2)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for SSD measure controlled, warning=FALSE, message=FALSE}
-tab4=as.data.frame(round(p.adjust(c(.0001, 0.0517), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
+tab4=as.data.frame(round(p.adjust(c(0.0002, 0.0566), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
 colnames(tab4)<-cbind('P-value')
 tab4
 ```
@@ -295,7 +295,7 @@ ggplot(MetaData, aes(x=BodySizeControlled, y=r, fill = BodySizeControlled, colou
   scale_color_manual(values =colpal4)+
   scale_fill_manual(values =colpal4)+
   scale_x_discrete(labels=(c("Controlled","Uncontrolled")),expand=c(.15,0))+
-  annotate("text", x=2, y=1.1, label= "n = 105",size=3.5) +
+  annotate("text", x=2, y=1.1, label= "n = 110",size=3.5) +
   annotate("text", x=1, y=1.1, label= "n = 17",size=3.5)  + theme
 ```
 
@@ -315,7 +315,7 @@ summary(Model_cREML_by_Phylo2)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Phylogentic vs non-phylogenetic studies, warning=FALSE, message=FALSE}
-tab5=as.data.frame(round(p.adjust(c(0.0001, 0.0027), method = 'fdr'),digit=3),row.names=cbind("Non-phylogenetic","With phylogeny"))
+tab5=as.data.frame(round(p.adjust(c(0.0001, 0.0028), method = 'fdr'),digit=3),row.names=cbind("Non-phylogenetic","With phylogeny"))
 colnames(tab5)<-cbind('P-value')
 tab5
 ```
@@ -339,8 +339,8 @@ ggplot(MetaData, aes(x=PhyloControlled, y=r, fill = PhyloControlled, colour = Ph
   scale_color_manual(values =colpal4)+
   scale_fill_manual(values =colpal4)+
   scale_x_discrete(labels=(c("Phylogenetically \n uncorrected ","Phylogenetically \n corrected ")),expand=c(.15,0))+
-  annotate("text", x=1, y=1.1, label= "n = 20",size=3.5) +
-  annotate("text", x=2, y=1.1, label= "n = 102",size=3.5)  + theme
+  annotate("text", x=1, y=1.1, label= "n = 23",size=3.5) +
+  annotate("text", x=2, y=1.1, label= "n = 104",size=3.5)  + theme
 ```
 ## Percentage of species with female-biased SSD
 There was variation in the primary studies regarding the typical SSD in the studied taxa (i.e. some studies focused on taxa with more male-biased SSD, while others on taxa with more female-biased SSD). Still, there was no significant relationship between the percentage of species with a female-biased SSD and effect sizes.
@@ -481,7 +481,7 @@ summary(Model_REML_by_cSexSelCat7)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Sexual selection category non-phylogenetic models, warning=FALSE, message=FALSE}
-tab2=as.data.frame(round(p.adjust(c(0.2930, 0.9215, 0.0124, .0001, .0001, .0001, .0001), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
+tab2=as.data.frame(round(p.adjust(c(0.2937, 0.7259, 0.0110, .0001, .0001, .0001, .0001), method = 'fdr'),digit=3),row.names=cbind("Postmating competition","Trait-based","Density",'Premating competition',"Mating system","OSR","Other"))
 colnames(tab2)<-cbind('P-value')
 tab2
 ```
@@ -535,7 +535,7 @@ summary(Model_cREML_by_Class9)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for Phylogenetic classes, warning=FALSE, message=FALSE}
-tab2=as.data.frame(round(p.adjust(c(.0001, 0.1806, .0001, 0.4415, 0.0454, 0.3352, 0.9948, 0.0009, 0.7710, 0.0796, 0.3071), method = 'fdr'),digit=3),row.names=cbind( "Animalia","Nematoda","Trematoda","Insecta","Malacostraca","Pisces" ,"Actinopterygii","Amphibia","Mammalia","Reptilia","Aves"))
+tab2=as.data.frame(round(p.adjust(c(.0001, 0.0529, .0001, 0.1816, 0.0427, 0.3350, 0.9948, 0.0010, 0.7357, 0.0821, 0.3116), method = 'fdr'),digit=3),row.names=cbind( "Animalia","Nematoda","Trematoda","Insecta","Malacostraca","Pisces" ,"Actinopterygii","Amphibia","Mammalia","Reptilia","Aves"))
 colnames(tab2)<-cbind('P-value')
 tab2
 ```
@@ -629,7 +629,7 @@ summary(Model_REML_by_cBodySizeCont2)
 ```
 Finally, we computed FDR corrected p-values:
 ```{r FDR corrected p-values for SSD measure controlled non-phylogenetic models, warning=FALSE, message=FALSE}
-tab4=as.data.frame(round(p.adjust(c(.0001, 0.0172), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
+tab4=as.data.frame(round(p.adjust(c(.0001, 0.0166), method = 'fdr'),digit=3),row.names=cbind("uncontrolled","controlled"))
 colnames(tab4)<-cbind('P-value')
 tab4
 ```
