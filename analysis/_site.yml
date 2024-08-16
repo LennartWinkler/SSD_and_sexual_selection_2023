@@ -8,6 +8,8 @@ navbar:
     href: index.html
   - text: Analyses 2
     href: index2.html
+  - text: License
+    href: license.html
 output:
   workflowr::wflow_html:
     toc: true
